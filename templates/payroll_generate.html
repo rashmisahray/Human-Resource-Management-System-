@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Generate Ledger{% endblock %}
+{% block page_title %}Payroll Generation{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <form method="POST" style="max-width: 1000px; margin: 0 auto;">
+        <div class="pulse-form-section">
+            <h3 class="pulse-tile-title" style="margin-bottom: 24px; color: var(--electric-primary);"><i
+                    class="fas fa-user-tag"></i> Target & Cycle</h3>
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 24px;">
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Identify Personnel</label>
+                    <select id="employee_select" class="pulse-input" onchange="fillEmployeeDetails(this)" required>
+                        <option value="">Choose Talent</option>
+                        {% for emp in employees %}
+                        <option value="{{ emp._id }}"
+                            data-name="{{ emp.personal.first_name }} {{ emp.personal.last_name }}"
+                            data-empid="{{ emp.employee_id }}" data-dept="{{ emp.job.department_name }}">
+                            {{ emp.personal.first_name }} {{ emp.personal.last_name }} ({{ emp.employee_id }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" id="employee_id" name="employee_id">
+                    <input type="hidden" id="employee_name" name="employee_name">
+                    <input type="hidden" id="department" name="department">
+                </div>
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Cycle Month</label>
+                    <select name="month" class="pulse-input" required>
+                        {% for m in months %}
+                        <option value="{{ m }}">{{ m }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Year</label>
+                    <input type="number" name="year" class="pulse-input" value="2026" required>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px;">
+            <div class="pulse-form-section">
+                <h3 class="pulse-tile-title" style="margin-bottom: 24px; color: var(--neon-success);"><i
+                        class="fas fa-arrow-trend-up"></i> Earnings (INR)</h3>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="pulse-form-group">
+                        <label class="pulse-label">Base Credits</label>
+                        <input type="number" id="basic" name="basic" class="pulse-input" value="30000"
+                            oninput="calculatePayroll()" required>
+                    </div>
+                    <div class="pulse-form-group">
+                        <label class="pulse-label">HRA Allowance</label>
+                        <input type="number" id="hra" name="hra" class="pulse-input" value="12000"
+                            oninput="calculatePayroll()">
+                    </div>
+                    <div class="pulse-form-group">
+                        <label class="pulse-label">DA Adjust</label>
+                        <input type="number" id="da" name="da" class="pulse-input" value="5000"
+                            oninput="calculatePayroll()">
+                    </div>
+                    <div class="pulse-form-group">
+                        <label class="pulse-label">Travel Uplink</label>
+                        <input type="number" id="ta" name="ta" class="pulse-input" value="3000"
+                            oninput="calculatePayroll()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pulse-form-section">
+                <h3 class="pulse-tile-title" style="margin-bottom: 24px; color: var(--neon-danger);"><i
+                        class="fas fa-arrow-trend-down"></i> Deductions (INR)</h3>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="pulse-form-group">
+                        <label class="pulse-label">System Contribution (PF)</label>
+                        <input type="number" id="pf" name="pf" class="pulse-input" value="3600"
+                            oninput="calculatePayroll()">
+                    </div>
+                    <div class="pulse-form-group">
+                        <label class="pulse-label">Governance Tax</label>
+                        <input type="number" id="tax" name="tax" class="pulse-input" value="2500"
+                            oninput="calculatePayroll()">
+                    </div>
+                    <div class="pulse-form-group">
+                        <label class="pulse-label">Other Outflows</label>
+                        <input type="number" id="other_deductions" name="other_deductions" class="pulse-input" value="0"
+                            oninput="calculatePayroll()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pulse-tile" style="background: linear-gradient(to right, var(--panel-bg), var(--surface-low));">
+            <h3 class="pulse-tile-title" style="margin-bottom: 32px;"><i class="fas fa-calculator"></i> Final
+                Calculation</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; text-align: center;">
+                <div>
+                    <p class="pulse-label">Gross Credits</p>
+                    <p id="gross-display" style="font-size: 28px; font-weight: 700; color: var(--text-pure);">₹0</p>
+                </div>
+                <div>
+                    <p class="pulse-label">Total Outflow</p>
+                    <p id="deductions-display" style="font-size: 28px; font-weight: 700; color: var(--neon-danger);">₹0
+                    </p>
+                </div>
+                <div>
+                    <p class="pulse-label">Net Yield</p>
+                    <p id="net-display" style="font-size: 32px; font-weight: 800; color: var(--electric-primary);">₹0
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 16px; margin-top: 40px; justify-content: flex-end;">
+            <a href="{{ url_for('payroll_bp.payroll_list') }}" class="pulse-trigger pulse-trigger-outline"
+                style="padding: 14px 32px;">
+                Abort
+            </a>
+            <button type="submit" class="pulse-trigger pulse-trigger-primary"
+                style="padding: 14px 44px; font-size: 16px;">
+                <i class="fas fa-file-signature" style="margin-right: 12px;"></i> Commit Ledger
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function fillEmployeeDetails(select) {
+        var opt = select.options[select.selectedIndex];
+        document.getElementById("employee_id").value = opt.getAttribute("data-empid") || "";
+        document.getElementById("employee_name").value = opt.getAttribute("data-name") || "";
+        document.getElementById("department").value = opt.getAttribute("data-dept") || "";
+    }
+
+    function calculatePayroll() {
+        var basic = parseFloat(document.getElementById("basic").value) || 0;
+        var hra = parseFloat(document.getElementById("hra").value) || 0;
+        var da = parseFloat(document.getElementById("da").value) || 0;
+        var ta = parseFloat(document.getElementById("ta").value) || 0;
+        var pf = parseFloat(document.getElementById("pf").value) || 0;
+        var tax = parseFloat(document.getElementById("tax").value) || 0;
+        var other = parseFloat(document.getElementById("other_deductions").value) || 0;
+
+        var gross = basic + hra + da + ta;
+        var deductions = pf + tax + other;
+        var net = gross - deductions;
+
+        document.getElementById("gross-display").textContent = "₹" + gross.toLocaleString("en-IN");
+        document.getElementById("deductions-display").textContent = "- ₹" + deductions.toLocaleString("en-IN");
+        document.getElementById("net-display").textContent = "₹" + net.toLocaleString("en-IN");
+    }
+
+    calculatePayroll();
+</script>
+{% endblock %}

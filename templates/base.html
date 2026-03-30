@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulse HR - {% block title %}Dashboard{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <div class="pulse-layout-root">
+        <aside class="pulse-side-nav" id="sidebar">
+            <div class="pulse-nav-header">
+                <div class="pulse-logo-badge">P</div>
+                <span class="pulse-logo-text">PulseHR</span>
+            </div>
+            <nav class="pulse-nav-group">
+                <a href="{{ url_for('employee_bp.dashboard') }}"
+                    class="pulse-nav-item {% if request.endpoint == 'employee_bp.dashboard' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fas fa-th-large"></i></span>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+                <a href="{{ url_for('employee_bp.employee_list') }}"
+                    class="pulse-nav-item {% if 'employee' in request.endpoint %}active{% endif %}">
+                    <span class="nav-icon"><i class="fas fa-user-friends"></i></span>
+                    <span class="nav-label">Employees</span>
+                </a>
+                <a href="{{ url_for('department_bp.departments_page') }}"
+                    class="pulse-nav-item {% if 'department' in request.endpoint %}active{% endif %}">
+                    <span class="nav-icon"><i class="fas fa-layer-group"></i></span>
+                    <span class="nav-label">Departments</span>
+                </a>
+                <a href="{{ url_for('department_bp.locations_page') }}"
+                    class="pulse-nav-item {% if 'location' in request.endpoint %}active{% endif %}">
+                    <span class="nav-icon"><i class="fas fa-globe-americas"></i></span>
+                    <span class="nav-label">Locations</span>
+                </a>
+                {% if session.get('role') in ['admin', 'finance'] %}
+                <a href="{{ url_for('payroll_bp.payroll_list') }}"
+                    class="pulse-nav-item {% if 'payroll' in request.endpoint %}active{% endif %}">
+                    <span class="nav-icon"><i class="fas fa-wallet"></i></span>
+                    <span class="nav-label">Payroll</span>
+                </a>
+                {% endif %}
+            </nav>
+            <div class="pulse-side-footer">
+                <div class="pulse-user-pill">
+                    <div class="pulse-avatar-sm">{{ session.get('name', 'U')[0] }}</div>
+                    <div class="pulse-user-meta">
+                        <span class="name">{{ session.get('name', 'User') }}</span>
+                        <span class="role">{{ session.get('role', 'admin') }}</span>
+                    </div>
+                </div>
+                <a href="{{ url_for('auth_bp.logout') }}" class="pulse-nav-item logout-link" style="color: var(--neon-danger);">
+                    <span class="nav-icon"><i class="fas fa-power-off"></i></span>
+                    <span class="nav-label">Sign Out</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="pulse-content-viewport">
+            <header class="pulse-header-bar">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <button class="pulse-trigger pulse-trigger-outline mobile-toggle" onclick="toggleSidebar()" style="display: none; padding: 8px 12px;">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="pulse-page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+                <div class="pulse-action-group">
+                    <div class="pulse-badge pulse-badge-info">
+                        <i class="fas fa-shield-halved"></i> {{ session.get('role', 'admin') }}
+                    </div>
+                </div>
+            </header>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="pulse-badge pulse-badge-{{ 'success' if category == 'success' else 'danger' }}" 
+                 style="margin: 20px 40px -20px; display: block; cursor: pointer; text-align: center;" 
+                 onclick="this.remove()">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <div class="pulse-main-area">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+    </script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+
+</html>

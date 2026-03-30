@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit" if mode == "edit" else "Add" }} Talent{% endblock %}
+{% block page_title %}{{ "Configure" if mode == "edit" else "Initialize" }} Talent{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <form method="POST" style="max-width: 1000px; margin: 0 auto;">
+        <div class="pulse-form-section">
+            <h3 class="pulse-tile-title" style="margin-bottom: 24px; color: var(--electric-primary);"><i
+                    class="fas fa-id-card"></i> Core Identity</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Target ID</label>
+                    <input type="text" name="employee_id" class="pulse-input" placeholder="e.g. PULSE-001"
+                        value="{{ employee.employee_id if mode == 'edit' else '' }}" required>
+                </div>
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Initial Status</label>
+                    <select name="status" class="pulse-input">
+                        {% set current_status = employee.status if mode == 'edit' else 'onboarding' %}
+                        <option value="onboarding" {{ 'selected' if current_status=='onboarding' }}>Onboarding</option>
+                        <option value="probation" {{ 'selected' if current_status=='probation' }}>Probation</option>
+                        <option value="confirmed" {{ 'selected' if current_status=='confirmed' }}>Confirmed</option>
+                        <option value="active" {{ 'selected' if current_status=='active' }}>Active</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="pulse-form-section">
+            <h3 class="pulse-tile-title" style="margin-bottom: 24px; color: var(--electric-primary);"><i
+                    class="fas fa-user-astronaut"></i> Personal Parameters</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Designation A</label>
+                    <input type="text" name="first_name" class="pulse-input" placeholder="First Name"
+                        value="{{ employee.personal.first_name if mode == 'edit' else '' }}" required>
+                </div>
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Designation B</label>
+                    <input type="text" name="last_name" class="pulse-input" placeholder="Last Name"
+                        value="{{ employee.personal.last_name if mode == 'edit' else '' }}" required>
+                </div>
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Sync Link (Email)</label>
+                    <input type="email" name="email" class="pulse-input" placeholder="talent@pulse.net"
+                        value="{{ employee.personal.email if mode == 'edit' else '' }}" required>
+                </div>
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Comms Line (Phone)</label>
+                    <input type="text" name="phone" class="pulse-input" placeholder="+X XXX XXX XXXX"
+                        value="{{ employee.personal.phone if mode == 'edit' else '' }}">
+                </div>
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Initialization Date (DOB)</label>
+                    <input type="date" name="date_of_birth" class="pulse-input"
+                        value="{{ employee.personal.date_of_birth if mode == 'edit' else '' }}">
+                </div>
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Spec</label>
+                    <select name="gender" class="pulse-input">
+                        {% set current_gender = employee.personal.gender if mode == 'edit' else '' %}
+                        <option value="">Select</option>
+                        <option value="Male" {{ 'selected' if current_gender=='Male' }}>Male</option>
+                        <option value="Female" {{ 'selected' if current_gender=='Female' }}>Female</option>
+                        <option value="Other" {{ 'selected' if current_gender=='Other' }}>Other</option>
+                    </select>
+                </div>
+                <div class="pulse-form-group" style="grid-column: 1 / -1;">
+                    <label class="pulse-label">Base Coordinates (Address)</label>
+                    <textarea name="address" class="pulse-input" rows="2"
+                        placeholder="Full address...">{{ employee.personal.address if mode == 'edit' else '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="pulse-form-section">
+            <h3 class="pulse-tile-title" style="margin-bottom: 24px; color: var(--electric-primary);"><i
+                    class="fas fa-shuttle-space"></i> Orbital Station</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Mission Role</label>
+                    <input type="text" name="designation" class="pulse-input" placeholder="e.g. Systems Engineer"
+                        value="{{ employee.job.designation if mode == 'edit' else '' }}" required>
+                </div>
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Assigned Unit</label>
+                    <select id="department_id" name="department_id" class="pulse-input"
+                        onchange="setDepartmentName(this)">
+                        <option value="">Select Unit</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept._id }}" data-name="{{ dept.name }}" {{ 'selected' if mode=='edit' and
+                            employee.job.department_id==dept._id }}>{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" id="department_name" name="department_name"
+                        value="{{ employee.job.department_name if mode == 'edit' else '' }}">
+                </div>
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Base Location</label>
+                    <select id="location_id" name="location_id" class="pulse-input" onchange="setLocationName(this)">
+                        <option value="">Select Station</option>
+                        {% for loc in locations %}
+                        <option value="{{ loc._id }}" data-name="{{ loc.name }}" {{ 'selected' if mode=='edit' and
+                            employee.job.location_id==loc._id }}>{{ loc.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" id="location_name" name="location_name"
+                        value="{{ employee.job.location_name if mode == 'edit' else '' }}">
+                </div>
+                <div class="pulse-form-group">
+                    <label class="pulse-label">Deployment Date</label>
+                    <input type="date" name="date_of_joining" class="pulse-input"
+                        value="{{ employee.job.date_of_joining if mode == 'edit' else '' }}">
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 16px; margin-top: 40px; justify-content: flex-end;">
+            <a href="{{ url_for('employee_bp.employee_list') }}" class="pulse-trigger pulse-trigger-outline"
+                style="padding: 14px 32px;">
+                Abort Mission
+            </a>
+            <button type="submit" class="pulse-trigger pulse-trigger-primary"
+                style="padding: 14px 44px; font-size: 16px;">
+                <i class="fas fa-save" style="margin-right: 12px;"></i> {{ "Update Talent" if mode == "edit" else
+                "Initialize Talent" }}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function setDepartmentName(sel) {
+        var opt = sel.options[sel.selectedIndex];
+        document.getElementById('department_name').value = opt.getAttribute('data-name');
+    }
+    function setLocationName(sel) {
+        var opt = sel.options[sel.selectedIndex];
+        document.getElementById('location_name').value = opt.getAttribute('data-name');
+    }
+</script>
+{% endblock %}

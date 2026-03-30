@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="pulse-stat-grid fade-in">
+    <div class="pulse-stat-box">
+        <div class="pulse-stat-value">{{ total_employees }}</div>
+        <div class="pulse-stat-label">Total Talents</div>
+        <div class="pulse-stat-icon"><i class="fas fa-user-astronaut"></i></div>
+    </div>
+    <div class="pulse-stat-box">
+        <div class="pulse-stat-value">{{ total_departments }}</div>
+        <div class="pulse-stat-label">Units</div>
+        <div class="pulse-stat-icon"><i class="fas fa-shuttle-space"></i></div>
+    </div>
+    <div class="pulse-stat-box">
+        <div class="pulse-stat-value">{{ total_locations }}</div>
+        <div class="pulse-stat-label">Stations</div>
+        <div class="pulse-stat-icon"><i class="fas fa-satellite-dish"></i></div>
+    </div>
+</div>
+
+<div class="pulse-tile fade-in" style="animation-delay: 0.1s;">
+    <div class="pulse-tile-header">
+        <h2 class="pulse-tile-title"><i class="fas fa-sparkles"
+                style="color: var(--electric-primary); margin-right: 12px;"></i> Recent Onboarding</h2>
+        {% if session.get('role') in ['admin', 'hr'] %}
+        <a href="{{ url_for('employee_bp.employee_add') }}" class="pulse-trigger pulse-trigger-primary">
+            <i class="fas fa-plus-circle"></i> New Hire
+        </a>
+        {% endif %}
+    </div>
+    <div class="pulse-table-container">
+        <table class="pulse-data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Talent Profile</th>
+                    <th>Mission/Role</th>
+                    <th>Unit</th>
+                    <th>Status</th>
+                    <th>Operation</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in recent_hires %}
+                <tr>
+                    <td><span style="color: var(--text-muted);">#</span>{{ emp.employee_id }}</td>
+                    <td style="font-weight: 600; color: var(--text-pure);">{{ emp.personal.first_name }} {{
+                        emp.personal.last_name }}</td>
+                    <td>{{ emp.job.designation }}</td>
+                    <td>{{ emp.job.department_name }}</td>
+                    <td><span class="pulse-badge pulse-badge-{{ 'success' if emp.status == 'active' else 'info' }}">{{
+                            emp.status }}</span></td>
+                    <td>
+                        <a href="{{ url_for('employee_bp.employee_profile', emp_id=emp._id) }}"
+                            class="pulse-trigger pulse-trigger-outline" style="padding: 6px 14px; font-size: 13px;">
+                            <i class="fas fa-fingerprint"></i> Profile
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not recent_hires %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 48px; color: var(--text-muted);">
+                        <i class="fas fa-ghost"
+                            style="font-size: 32px; display: block; margin-bottom: 12px; opacity: 0.5;"></i>
+                        No data transmissions received.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

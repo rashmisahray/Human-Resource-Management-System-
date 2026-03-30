@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulse HR - Authentication</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body class="pulse-auth-root">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="pulse-badge pulse-badge-{{ 'success' if category == 'success' else 'danger' }}" onclick="this.remove()"
+        style="position:fixed;top:40px;right:40px;z-index:999; padding: 12px 24px; cursor: pointer;">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="pulse-auth-card fade-in">
+        <div class="pulse-auth-header">
+            <div class="pulse-logo-badge" style="margin: 0 auto 24px;">P</div>
+            <h1 class="pulse-page-title" style="font-size: 32px; margin-bottom: 8px;">Access Terminal</h1>
+            <p style="color: var(--text-muted); font-size: 14px;">Synchronize with Pulse Network</p>
+        </div>
+
+        <div class="pulse-tabs"
+            style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 32px;">
+            <button class="pulse-trigger pulse-trigger-outline active-tab" data-role="admin" onclick="switchRole(this)"
+                style="display: block; text-align: center;">
+                <i class="fas fa-user-shield"></i> Admin
+            </button>
+            <button class="pulse-trigger pulse-trigger-outline" data-role="hr" onclick="switchRole(this)"
+                style="display: block; text-align: center;">
+                <i class="fas fa-users"></i> HR
+            </button>
+            <button class="pulse-trigger pulse-trigger-outline" data-role="finance" onclick="switchRole(this)"
+                style="display: block; text-align: center;">
+                <i class="fas fa-coins"></i> Finance
+            </button>
+            <button class="pulse-trigger pulse-trigger-outline" data-role="depthead" onclick="switchRole(this)"
+                style="display: block; text-align: center;">
+                <i class="fas fa-sitemap"></i> Dept Head
+            </button>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth_bp.login') }}" class="pulse-login-form">
+            <input type="hidden" id="role-tab-input" name="role_tab" value="admin">
+
+            <div class="pulse-form-group">
+                <label class="pulse-label">Identity</label>
+                <div style="position: relative;">
+                    <i class="fas fa-at"
+                        style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    <input type="text" name="username" class="pulse-input" placeholder="User ID" required
+                        style="padding-left: 48px;">
+                </div>
+            </div>
+
+            <div class="pulse-form-group">
+                <label class="pulse-label">Access Code</label>
+                <div style="position: relative;">
+                    <i class="fas fa-key"
+                        style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    <input type="password" name="password" class="pulse-input" placeholder="••••••••" required
+                        style="padding-left: 48px;">
+                </div>
+            </div>
+
+            <button type="submit" class="pulse-trigger pulse-trigger-primary"
+                style="width: 100%; justify-content: center; margin-top: 12px; height: 52px; font-size: 16px;">
+                Initialize Uplink <i class="fas fa-arrow-right"></i>
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 32px;">
+            <p style="font-size: 12px; color: var(--text-muted);">
+                <i class="fas fa-lock" style="margin-right: 6px;"></i> Secure Encrypted Protocol
+            </p>
+        </div>
+    </div>
+
+    <style>
+        .pulse-trigger-outline.active-tab {
+            background: var(--electric-glow);
+            border-color: var(--electric-primary);
+            color: var(--electric-primary);
+        }
+    </style>
+
+    <script>
+        function switchRole(btn) {
+            document.querySelectorAll('.pulse-trigger-outline').forEach(t => t.classList.remove('active-tab'));
+            btn.classList.add('active-tab');
+            document.getElementById('role-tab-input').value = btn.getAttribute('data-role');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Employees{% endblock %}
+{% block page_title %}Employees{% endblock %}
+
+{% block content %}
+<div class="pulse-tile fade-in">
+    <div class="pulse-tile-header">
+        <div class="search-box">
+            <form method="GET" action="{{ url_for('employee_bp.employee_list') }}"
+                style="display: flex; gap: 12px; align-items: center;">
+                <div style="position: relative;">
+                    <i class="fas fa-search"
+                        style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    <input type="text" name="search" class="pulse-input" placeholder="Search mission records..."
+                        value="{{ search_query }}" style="padding-left: 44px; width: 320px;">
+                </div>
+                <button type="submit" class="pulse-trigger pulse-trigger-primary">Scan</button>
+                {% if search_query %}
+                <a href="{{ url_for('employee_bp.employee_list') }}" class="pulse-trigger pulse-trigger-outline">
+                    <i class="fas fa-undo"></i>
+                </a>
+                {% endif %}
+            </form>
+        </div>
+        {% if session.get('role') in ['admin', 'hr'] %}
+        <a href="{{ url_for('employee_bp.employee_add') }}" class="pulse-trigger pulse-trigger-primary">
+            <i class="fas fa-rocket"></i> New Talent
+        </a>
+        {% endif %}
+    </div>
+    <div class="pulse-table-container">
+        <table class="pulse-data-table">
+            <thead>
+                <tr>
+                    <th>Designation</th>
+                    <th>Talent</th>
+                    <th>Comms</th>
+                    <th>Role</th>
+                    <th>Unit</th>
+                    <th>Station</th>
+                    <th>Status</th>
+                    <th>Ops</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in employees %}
+                <tr>
+                    <td><span style="color: var(--text-muted);">#</span>{{ emp.employee_id }}</td>
+                    <td style="font-weight: 600; color: var(--text-pure);">{{ emp.personal.first_name }} {{
+                        emp.personal.last_name }}</td>
+                    <td style="font-size: 13px; color: var(--text-soft);">{{ emp.personal.email }}</td>
+                    <td>{{ emp.job.designation }}</td>
+                    <td>{{ emp.job.department_name }}</td>
+                    <td>{{ emp.job.location_name }}</td>
+                    <td><span class="pulse-badge pulse-badge-{{ 'success' if emp.status == 'active' else 'info' }}">{{
+                            emp.status }}</span></td>
+                    <td class="action-cell" style="display: flex; gap: 8px;">
+                        <a href="{{ url_for('employee_bp.employee_profile', emp_id=emp._id) }}"
+                            class="pulse-trigger pulse-trigger-outline" style="padding: 8px 12px;">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% if session.get('role') in ['admin', 'hr'] %}
+                        <a href="{{ url_for('employee_bp.employee_edit', emp_id=emp._id) }}"
+                            class="pulse-trigger pulse-trigger-outline"
+                            style="padding: 8px 12px; border-color: var(--neon-warning); color: var(--neon-warning);">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('employee_bp.employee_delete', emp_id=emp._id) }}"
+                            style="display:inline;" onsubmit="return confirmDelete('employee')">
+                            <button type="submit" class="pulse-trigger pulse-trigger-outline"
+                                style="padding: 8px 12px; border-color: var(--neon-danger); color: var(--neon-danger);">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not employees %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 64px; color: var(--text-muted);">
+                        <i class="fas fa-radar"
+                            style="font-size: 40px; display: block; margin-bottom: 16px; opacity: 0.3;"></i>
+                        No talent matching your coordinates.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

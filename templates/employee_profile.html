@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}{{ employee.personal.first_name }} {{ employee.personal.last_name }}{% endblock %}
+{% block page_title %}Talent Dossier{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="pulse-tile" style="display: flex; align-items: center; gap: 32px; padding: 40px;">
+        <div class="pulse-avatar-sm"
+            style="width: 100px; height: 100px; font-size: 32px; background: var(--electric-glow); color: var(--electric-primary); border-color: var(--electric-primary);">
+            {{ employee.personal.first_name[0] }}{{ employee.personal.last_name[0] if employee.personal.last_name else
+            '' }}
+        </div>
+        <div style="flex: 1;">
+            <h2 class="pulse-page-title" style="font-size: 32px; margin-bottom: 8px;">{{ employee.personal.first_name }}
+                {{ employee.personal.last_name }}</h2>
+            <div style="display: flex; gap: 20px; color: var(--text-soft); font-size: 15px;">
+                <span><i class="fas fa-id-badge" style="color: var(--electric-primary);"></i> {{
+                    employee.job.designation }}</span>
+                <span><i class="fas fa-atom" style="color: var(--electric-primary);"></i> {{
+                    employee.job.department_name }}</span>
+                <span><i class="fas fa-location-dot" style="color: var(--electric-primary);"></i> {{
+                    employee.job.location_name }}</span>
+            </div>
+            <div style="margin-top: 16px;">
+                <span class="pulse-badge pulse-badge-{{ 'success' if employee.status == 'active' else 'info' }}">{{
+                    employee.status }}</span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+            {% if session.get('role') in ['admin', 'hr'] %}
+            <a href="{{ url_for('employee_bp.employee_edit', emp_id=employee._id) }}"
+                class="pulse-trigger pulse-trigger-primary">
+                <i class="fas fa-user-gear"></i> Configure
+            </a>
+            <form method="POST" action="{{ url_for('employee_bp.employee_delete', emp_id=employee._id) }}"
+                style="display:inline;" onsubmit="return confirmDelete('employee')">
+                <button type="submit" class="pulse-trigger pulse-trigger-outline"
+                    style="border-color: var(--neon-danger); color: var(--neon-danger);">
+                    <i class="fas fa-trash-can"></i> Purge
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 28px; margin-bottom: 28px;">
+        <div class="pulse-tile">
+            <h3 class="pulse-tile-title" style="margin-bottom: 24px; color: var(--electric-primary);"><i
+                    class="fas fa-fingerprint"></i> Identity Parameters</h3>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div
+                    style="display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--divider);">
+                    <span style="color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Employee
+                        ID</span>
+                    <span style="font-weight: 600;">{{ employee.employee_id }}</span>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--divider);">
+                    <span style="color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Sync Link</span>
+                    <span style="font-weight: 600; color: var(--neon-info);">{{ employee.personal.email }}</span>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--divider);">
+                    <span style="color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Comms</span>
+                    <span style="font-weight: 600;">{{ employee.personal.phone }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Origin</span>
+                    <span style="text-align: right; max-width: 250px;">{{ employee.personal.address }}, {{
+                        employee.personal.city }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pulse-tile">
+            <h3 class="pulse-tile-title" style="margin-bottom: 24px; color: var(--electric-primary);"><i
+                    class="fas fa-microchip"></i> Mission Alignment</h3>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div
+                    style="display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--divider);">
+                    <span
+                        style="color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Deployment</span>
+                    <span style="font-weight: 600;">{{ employee.job.date_of_joining }}</span>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--divider);">
+                    <span style="color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Contract</span>
+                    <span style="font-weight: 600;">{{ employee.job.employment_type }}</span>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--divider);">
+                    <span
+                        style="color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Supervisor</span>
+                    <span style="font-weight: 600;">{{ employee.job.manager_name }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Base
+                        Station</span>
+                    <span style="font-weight: 600;">{{ employee.job.location_name }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if session.get('role') in ['admin', 'hr'] %}
+    <div class="pulse-tile">
+        <h3 class="pulse-tile-title" style="margin-bottom: 24px;"><i class="fas fa-bolt"></i> Status Uplink</h3>
+        <form method="POST" action="{{ url_for('employee_bp.employee_lifecycle', emp_id=employee._id) }}"
+            style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 20px; align-items: end;">
+            <div class="pulse-form-group" style="margin-bottom: 0;">
+                <label class="pulse-label">New Objective</label>
+                <select name="action" class="pulse-input" required>
+                    <option value="">Select Phase</option>
+                    <option value="probation">Probation</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="promoted">Promoted</option>
+                    <option value="transferred">Transferred</option>
+                    <option value="exited">Exit</option>
+                    <option value="fnf_settled">FNF Settled</option>
+                </select>
+            </div>
+            <div class="pulse-form-group" style="margin-bottom: 0;">
+                <label class="pulse-label">Mission Log</label>
+                <input type="text" name="note" class="pulse-input" placeholder="Encryption note...">
+            </div>
+            <button type="submit" class="pulse-trigger pulse-trigger-primary" style="height: 52px;">
+                Update Phase
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if employee.lifecycle_history %}
+    <div class="pulse-tile">
+        <h3 class="pulse-tile-title" style="margin-bottom: 32px;"><i class="fas fa-radar"></i> Transmission History</h3>
+        <div style="position: relative; padding-left: 32px;">
+            <div style="position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: var(--divider);">
+            </div>
+            {% for entry in employee.lifecycle_history|reverse %}
+            <div style="position: relative; margin-bottom: 32px;">
+                <div
+                    style="position: absolute; left: -31px; top: 4px; width: 14px; height: 14px; background: var(--electric-primary); border-radius: 50%; box-shadow: 0 0 10px var(--electric-glow); border: 3px solid var(--panel-bg-solid);">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="pulse-badge pulse-badge-info" style="font-size: 11px;">{{ entry.action }}</span>
+                        <span style="font-size: 12px; color: var(--text-muted);"><i class="far fa-clock"></i> {{
+                            entry.date }}</span>
+                    </div>
+                    {% if entry.note %}
+                    <p
+                        style="font-size: 14px; color: var(--text-soft); margin-top: 4px; background: var(--surface-low); padding: 12px; border-radius: var(--radius-sm);">
+                        {{ entry.note }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

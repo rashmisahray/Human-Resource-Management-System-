@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Ledger - {{ slip.employee_name }}{% endblock %}
+{% block page_title %}Ledger Inspection{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 900px; margin: 0 auto;">
+    <div class="pulse-tile" style="padding: 60px; position: relative; overflow: hidden;">
+        <div
+            style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: var(--electric-glow); filter: blur(100px); opacity: 0.2;">
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 60px; border-bottom: 1px solid var(--divider); padding-bottom: 40px;">
+            <div>
+                <h1 class="pulse-logo-text" style="font-size: 32px; margin-bottom: 8px;">PULSE SYSTEMS</h1>
+                <p style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-size: 12px;">
+                    Official Fiscal Ledger</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="color: var(--text-soft); font-weight: 600; font-size: 18px;">Cycle: {{ slip.month }} {{
+                    slip.year }}</p>
+                <div style="margin-top: 12px;">
+                    {% if slip.status == "paid" %}
+                    <span class="pulse-badge pulse-badge-success" style="padding: 8px 16px;"><i
+                            class="fas fa-check-double"></i> SETTLED</span>
+                    {% else %}
+                    <span class="pulse-badge pulse-badge-warning" style="padding: 8px 16px;"><i
+                            class="fas fa-clock"></i> PENDING</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-bottom: 60px;">
+            <div>
+                <p class="pulse-label">Talent</p>
+                <p style="font-size: 18px; font-weight: 700;">{{ slip.employee_name }}</p>
+            </div>
+            <div>
+                <p class="pulse-label">Designation ID</p>
+                <p style="font-size: 18px; font-weight: 700;">{{ slip.employee_id }}</p>
+            </div>
+            <div>
+                <p class="pulse-label">Operational Unit</p>
+                <p style="font-size: 18px; font-weight: 700;">{{ slip.department }}</p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-bottom: 60px;">
+            <div>
+                <h4
+                    style="color: var(--neon-success); margin-bottom: 24px; text-transform: uppercase; font-size: 13px; letter-spacing: 1px;">
+                    <i class="fas fa-plus-circle"></i> Yield Components</h4>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">Base Credits</span>
+                        <span>₹{{ "%.0f"|format(slip.earnings.basic) }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">HRA Allowance</span>
+                        <span>₹{{ "%.0f"|format(slip.earnings.hra) }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">DA Adjust</span>
+                        <span>₹{{ "%.0f"|format(slip.earnings.da) }}</span>
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--divider); padding-bottom: 12px;">
+                        <span style="color: var(--text-muted);">Travel Uplink</span>
+                        <span>₹{{ "%.0f"|format(slip.earnings.ta) }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: 700; padding-top: 8px;">
+                        <span>Gross Yield</span>
+                        <span style="color: var(--text-pure);">₹{{ "%.0f"|format(slip.earnings.gross) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h4
+                    style="color: var(--neon-danger); margin-bottom: 24px; text-transform: uppercase; font-size: 13px; letter-spacing: 1px;">
+                    <i class="fas fa-minus-circle"></i> Deduction Matrix</h4>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">System Fund (PF)</span>
+                        <span>₹{{ "%.0f"|format(slip.deductions.pf) }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">Statutory Tax</span>
+                        <span>₹{{ "%.0f"|format(slip.deductions.tax) }}</span>
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--divider); padding-bottom: 12px;">
+                        <span style="color: var(--text-muted);">Other Outflows</span>
+                        <span>₹{{ "%.0f"|format(slip.deductions.other) }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: 700; padding-top: 8px;">
+                        <span>Total Outflow</span>
+                        <span style="color: var(--neon-danger);">₹{{ "%.0f"|format(slip.deductions.total) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            style="background: var(--surface-low); padding: 32px; border-radius: var(--radius-lg); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--electric-glow);">
+            <div>
+                <p class="pulse-label" style="margin-bottom: 4px;">Net Transfer Amount</p>
+                <p style="font-size: 12px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;">
+                    Final Disbursement</p>
+            </div>
+            <p style="font-size: 42px; font-weight: 800; color: var(--electric-primary);">₹{{
+                "%.0f"|format(slip.net_pay) }}</p>
+        </div>
+
+        <div style="display: flex; gap: 16px; margin-top: 60px; justify-content: flex-end;">
+            {% if slip.status != "paid" %}
+            <form method="POST" action="{{ url_for('payroll_bp.payroll_pay', slip_id=slip._id) }}"
+                style="display:inline;">
+                <button type="submit" class="pulse-trigger pulse-trigger-primary" style="padding: 14px 40px;">
+                    <i class="fas fa-credit-card" style="margin-right: 12px;"></i> Process Settlement
+                </button>
+            </form>
+            {% endif %}
+            <a href="{{ url_for('payroll_bp.payroll_list') }}" class="pulse-trigger pulse-trigger-outline"
+                style="padding: 14px 32px;">
+                <i class="fas fa-arrow-left" style="margin-right: 12px;"></i> Return to Terminal
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

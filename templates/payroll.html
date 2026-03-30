@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Fiscal Center (Payroll){% endblock %}
+{% block page_title %}Fiscal Operations{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="pulse-stat-grid">
+        <div class="pulse-stat-box">
+            <div class="pulse-stat-value">{{ summary.generated.count + summary.paid.count }}</div>
+            <div class="pulse-stat-label">Total Ledgers</div>
+            <div class="pulse-stat-icon"><i class="fas fa-file-invoice"></i></div>
+        </div>
+        <div class="pulse-stat-box">
+            <div class="pulse-stat-value" style="color: var(--neon-success);">{{ summary.paid.count }}</div>
+            <div class="pulse-stat-label">Settled</div>
+            <div class="pulse-stat-icon"><i class="fas fa-circle-check"></i></div>
+        </div>
+        <div class="pulse-stat-box">
+            <div class="pulse-stat-value">₹{{ "%.0f"|format(summary.generated.total + summary.paid.total) }}</div>
+            <div class="pulse-stat-label">Aggregate Outflow</div>
+            <div class="pulse-stat-icon"><i class="fas fa-credit-card"></i></div>
+        </div>
+    </div>
+
+    <div class="pulse-tile">
+        <div class="pulse-tile-header">
+            <h2 class="pulse-tile-title"><i class="fas fa-microchip" style="color: var(--electric-primary);"></i>
+                Payroll Ledgers</h2>
+            <a href="{{ url_for('payroll_bp.payroll_generate') }}" class="pulse-trigger pulse-trigger-primary">
+                <i class="fas fa-plus"></i> Generate Ledger
+            </a>
+        </div>
+        <div class="pulse-table-container">
+            <table class="pulse-data-table">
+                <thead>
+                    <tr>
+                        <th>Personnel</th>
+                        <th>Sector</th>
+                        <th>Cycle</th>
+                        <th>Gross</th>
+                        <th>Deduction</th>
+                        <th>Net Yield</th>
+                        <th>Status</th>
+                        <th style="width: 180px;">Control</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slip in payslips %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ slip.employee_name }}</td>
+                        <td>{{ slip.department }}</td>
+                        <td style="color: var(--text-soft);">{{ slip.month }} {{ slip.year }}</td>
+                        <td>₹{{ "%.0f"|format(slip.earnings.gross) }}</td>
+                        <td style="color: var(--neon-danger);">₹{{ "%.0f"|format(slip.deductions.total) }}</td>
+                        <td style="font-weight: 600; color: var(--electric-primary);">₹{{ "%.0f"|format(slip.net_pay) }}
+                        </td>
+                        <td>
+                            {% if slip.status == "paid" %}
+                            <span class="pulse-badge pulse-badge-success">Settled</span>
+                            {% else %}
+                            <span class="pulse-badge pulse-badge-warning">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td class="action-cell" style="display: flex; gap: 8px;">
+                            <a href="{{ url_for('payroll_bp.payroll_view', slip_id=slip._id) }}"
+                                class="pulse-trigger pulse-trigger-outline" style="padding: 8px 12px;">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if slip.status != "paid" %}
+                            <form method="POST" action="{{ url_for('payroll_bp.payroll_pay', slip_id=slip._id) }}"
+                                style="display:inline;">
+                                <button type="submit" class="pulse-trigger pulse-trigger-outline"
+                                    style="padding: 8px 12px; border-color: var(--neon-success); color: var(--neon-success);">
+                                    <i class="fas fa-check-double"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                            <form method="POST" action="{{ url_for('payroll_bp.payroll_delete', slip_id=slip._id) }}"
+                                style="display:inline;" onsubmit="return confirmDelete('payslip')">
+                                <button type="submit" class="pulse-trigger pulse-trigger-outline"
+                                    style="padding: 8px 12px; border-color: var(--neon-danger); color: var(--neon-danger);">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not payslips %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 64px; color: var(--text-muted);">
+                            <i class="fas fa-receipt"
+                                style="font-size: 40px; display: block; margin-bottom: 16px; opacity: 0.3;"></i>
+                            No fiscal records found in current transmission.
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
